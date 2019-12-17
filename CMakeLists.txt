@@ -305,6 +305,8 @@ include_directories(SYSTEM
 include_directories(SYSTEM
  ${CMAKE_SOURCE_DIR}/src/external/boost/boost_1_68_0/)
 include_directories(SYSTEM
+ ${CMAKE_SOURCE_DIR}/src/external/openmp/)
+include_directories(SYSTEM
  ${CMAKE_SOURCE_DIR}/src/external/libpng/libpng-1.6.37/)
 include_directories(SYSTEM
  ${CMAKE_SOURCE_DIR}/src/external/libjpeg/jpeg-8d/)
@@ -448,6 +450,7 @@ set(_TC_COMMON_REQUIREMENTS
   boost
   libbz2
   z
+  omp
 )
 
 if(APPLE)
