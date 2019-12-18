@@ -28,7 +28,7 @@ set(OPENMP_STANDALONE_BUILD TRUE CACHE BOOL "")
 set(LIBOMP_ENABLE_SHARED OFF CACHE BOOL "")
 set(LIBOMP_USE_ADAPTIVE_LOCKS ${ON_X86} CACHE BOOL "")
 set(OPENMP_ENABLE_LIBOMPTARGET OFF CACHE BOOL "")
-
+set(LIBOMP_COPY_EXPORTS FALSE CACHE STRING "")
 
 
 # Set some flags based on build_type
@@ -60,18 +60,15 @@ libomp_append(my_libomp_suffix .dia RELWITHDEBINFO_BUILD)
 libomp_append(my_libomp_suffix .min MINSIZEREL_BUILD)
 libomp_append(my_libomp_suffix .s1 LIBOMP_STATS)
 
-set(LIBOMP_EXPORTS_DIR "${_openmp_dir}/exports")
+set(LIBOMP_EXPORTS_DIR "${_openmp_dir}/runtime/exports")
 set(LIBOMP_EXPORTS_CMN_DIR "${LIBOMP_EXPORTS_DIR}/common${libomp_suffix}/include")
-set(OMP_HEADER_FILE ${LIBOMP_EXPORTS_CMN_DIR}/omp.h)
 
-
+# for <crt_extern.h>
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+# build openmp
 add_subdirectory(${_openmp_dir})
 
-target_include_directories(omp INTERFACE ${LIBOMP_EXPORTS_CMN_DIR})
+target_include_directories(omp
+  INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/${LIBOMP_EXPORTS_CMN_DIR})
 
-add_custom_target(TARGET omp POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E create_symlink
-  ${OMP_HEADER_FILE} omp.h
-  COMMENT "link the omp.h to root dir")
