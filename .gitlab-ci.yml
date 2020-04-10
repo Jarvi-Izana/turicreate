@@ -127,8 +127,6 @@ collect_artifacts:
   dependencies:
     - build_wheel_mac_10_15_python36
     - build_wheel_debug_mac_10_15_python36
-    - build_wheel_mac_10_15_python36_1
-    - build_wheel_debug_mac_10_15_python36_1
   script:
     - find release/src/deployment/ -name '*.dylib' -exec mv {} target/ \;
     - rmdir -p release || find release
