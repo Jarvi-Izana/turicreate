@@ -421,7 +421,7 @@ list_objects_response list_objects_impl(s3url parsed_url, std::string proxy,
   }
 
   if (parsed_url.sdk_proxy && !parsed_url.sdk_proxy->empty()) {
-    parsed_url.sdk_proxy = proxy;
+    parsed_url.sdk_proxy = proxy.c_str();
   }
 
   S3Client client = init_aws_sdk_with_turi_env(parsed_url);
@@ -536,7 +536,7 @@ std::string delete_object_impl(s3url parsed_url, std::string proxy,
   }
 
   if (parsed_url.sdk_proxy && !parsed_url.sdk_proxy->empty()) {
-    parsed_url.sdk_proxy = proxy;
+    parsed_url.sdk_proxy = proxy.c_str();
   }
 
   S3Client client = init_aws_sdk_with_turi_env(parsed_url);
@@ -567,7 +567,7 @@ std::string delete_prefix_impl(s3url parsed_url, std::string proxy,
   }
 
   if (parsed_url.sdk_proxy && !parsed_url.sdk_proxy->empty()) {
-    parsed_url.sdk_proxy = proxy;
+    parsed_url.sdk_proxy = proxy.c_str();
   }
 
   S3Client client = init_aws_sdk_with_turi_env(parsed_url);
