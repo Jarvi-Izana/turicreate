@@ -8,44 +8,6 @@ cache:
   paths:
     - .docker_ccache
 
-build_wheel_debug_linux_python27:
-  tags:
-    - docker
-  services:
-    - docker:18.09-dind
-  image: docker:18.09
-  stage: build
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-  script:
-    - apk add bash nodejs
-    - mkdir -p /etc/ssl/certs/
-    - bash -e scripts/make_wheel.sh --skip_test --skip_cpp_test --build_number=$CI_PIPELINE_ID --num_procs=4 --debug --docker-python2.7
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - target/
-
-build_wheel_linux_python27:
-  tags:
-    - docker
-  services:
-    - docker:18.09-dind
-  image: docker:18.09
-  stage: build
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-  script:
-    - apk add bash nodejs
-    - mkdir -p /etc/ssl/certs/
-    - bash -e scripts/make_wheel.sh --skip_test --skip_cpp_test --build_number=$CI_PIPELINE_ID --num_procs=4 --docker-python2.7
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - target/
-
 build_wheel_debug_mac_10_15_python36:
   tags:
     - macos10.15
@@ -61,7 +23,6 @@ build_wheel_debug_mac_10_15_python36:
     expire_in: 1 day
     paths:
       - target/
-
 
 build_wheel_mac_10_15_python36:
   tags:
@@ -79,51 +40,26 @@ build_wheel_mac_10_15_python36:
     paths:
       - target/
 
-test_python_linux_python27:
-  tags:
-    - docker
-  services:
-    - docker:18.09-dind
-  image: docker:18.09
-  stage: test
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-  dependencies:
-    - build_wheel_linux_python27
-  script:
-    - apk add bash
-    - export TC_ENABLE_S3_TESTS=1
-    - bash -e scripts/test_wheel.sh --docker-python2.7
-  artifacts:
-    when: always
-    expire_in: 2 weeks
-    paths:
-      - pytest.*
-
-test_python_debug_linux_python27:
-  tags:
-    - docker
-  services:
-    - docker:18.09-dind
-  image: docker:18.09
-  stage: test
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_DRIVER: overlay2
-  dependencies:
-    - build_wheel_debug_linux_python27
-  script:
-    - apk add bash
-    - export TC_ENABLE_S3_TESTS=1
-    - bash -e scripts/test_wheel.sh --docker-python2.7
-  artifacts:
-    when: always
-    expire_in: 2 weeks
-    paths:
-      - pytest.*
-
 test_python_debug_mac_python36_10_14:
+  tags:
+    - macos10.14
+  only:
+    variables:
+      - $TC_HAS_MACOS_RUNNERS == "1"
+  stage: test
+  dependencies:
+    - build_wheel_debug_mac_10_15_python36
+  script:
+    - export VIRTUALENV="/Library/Frameworks/Python.framework/Versions/3.6/bin/virtualenv"
+    - export TC_ENABLE_S3_TESTS=1
+    - bash -e scripts/test_wheel.sh
+  artifacts:
+    when: always
+    expire_in: 2 weeks
+    paths:
+      - pytest.*
+
+test_python_debug_mac_python36_10_14_1:
   tags:
     - macos10.14
   only:
@@ -161,6 +97,25 @@ test_python_mac_python36_10_14:
     paths:
       - pytest.*
 
+test_python_mac_python36_10_14_1:
+  tags:
+    - macos10.14
+  only:
+    variables:
+      - $TC_HAS_MACOS_RUNNERS == "1"
+  stage: test
+  dependencies:
+    - build_wheel_mac_10_15_python36
+  script:
+    - export VIRTUALENV="/Library/Frameworks/Python.framework/Versions/3.6/bin/virtualenv"
+    - export TC_ENABLE_S3_TESTS=1
+    - bash -e scripts/test_wheel.sh
+  artifacts:
+    when: always
+    expire_in: 2 weeks
+    paths:
+      - pytest.*
+
 
 collect_artifacts:
   tags:
@@ -170,10 +125,10 @@ collect_artifacts:
   image: alpine:latest
   stage: collect_artifacts
   dependencies:
-    - build_wheel_linux_python27
-    - build_wheel_debug_linux_python27
     - build_wheel_mac_10_15_python36
     - build_wheel_debug_mac_10_15_python36
+    - build_wheel_mac_10_15_python36_1
+    - build_wheel_debug_mac_10_15_python36_1
   script:
     - find release/src/deployment/ -name '*.dylib' -exec mv {} target/ \;
     - rmdir -p release || find release
